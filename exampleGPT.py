@@ -459,7 +459,7 @@ def randomForestUsingEntropy():
     y = data.target
 
     # Train a random forest classifier using entropy as the criterion
-    clf = RandomForestClassifier(criterion='entropy', random_state=42)
+    clf = RandomForestClassifier(criterion='entropy', random_state=42)  # criterion{“gini”, “entropy”, “log_loss”}, default=”gini”
     clf.fit(X, y)
 
     # Print feature importance
