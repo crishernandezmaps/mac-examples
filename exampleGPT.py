@@ -450,8 +450,10 @@ def randomForestUsingEntropy():
     Documentation: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn-ensemble-randomforestclassifier
     """
     import numpy as np
+    import matplotlib.pyplot as plt
     from sklearn.datasets import load_iris
     from sklearn.ensemble import RandomForestClassifier
+    from sklearn.decomposition import PCA
 
     # Load iris dataset
     data = load_iris()
@@ -459,13 +461,20 @@ def randomForestUsingEntropy():
     y = data.target
 
     # Train a random forest classifier using entropy as the criterion
-    clf = RandomForestClassifier(criterion='entropy', random_state=42)  # criterion{“gini”, “entropy”, “log_loss”}, default=”gini”
+    clf = RandomForestClassifier(criterion='entropy', random_state=42)
     clf.fit(X, y)
 
-    # Print feature importance
-    print("Feature importances based on entropy:")
-    for feature, importance in zip(data.feature_names, clf.feature_importances_):
-        print(f"{feature}: {importance:.4f}")
+    # Apply PCA and reduce to 2 dimensions
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
+
+    # Plotting the 2D visualization
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, edgecolor='k', s=150)
+    plt.colorbar()
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('2D PCA of Iris Dataset')
+    plt.show()
 
     # Predict
     predictions = clf.predict(X)
@@ -473,4 +482,88 @@ def randomForestUsingEntropy():
     return predictions
 
 
-randomForestUsingEntropy()
+def compareRandomForestCriteria():
+    """
+    Documentation: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn-ensemble-randomforestclassifier
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.datasets import load_iris
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.decomposition import PCA
+
+    # Load iris dataset
+    data = load_iris()
+    X = data.data
+    y = data.target
+
+    # Prepare PCA for visualization
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
+
+    # Create subplots for side-by-side comparison
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+    for ax, criterion in zip(axes, ["entropy", "gini"]):
+        # Train a random forest classifier
+        clf = RandomForestClassifier(criterion=criterion, random_state=42)
+        clf.fit(X, y)
+        predictions = clf.predict(X)
+        print(predictions)
+
+        # Plotting the 2D visualization
+        sc = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=predictions, edgecolor='k', s=150)
+        ax.set_title(f'2D PCA using {criterion}')
+        ax.set_xlabel('Principal Component 1')
+        ax.set_ylabel('Principal Component 2')
+        fig.colorbar(sc, ax=ax)
+
+    plt.tight_layout()
+    plt.show()
+
+    return predictions  # Returns the predictions from the last classifier (Gini in this case)
+
+
+
+def simplifiedRandomForest(method='gini'):
+    """
+    Documentation: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn-ensemble-randomforestclassifier
+    """
+    import matplotlib.pyplot as plt
+    from sklearn.datasets import load_iris
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.decomposition import PCA
+
+    # Validate method
+    if method not in ['gini', 'entropy']:
+        print("Invalid method. Choose either 'gini' or 'entropy'.")
+        return
+
+    # Load iris dataset
+    data = load_iris()
+    X = data.data
+    y = data.target
+
+    # Prepare PCA for visualization
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X)
+
+    # Train a random forest classifier
+    clf = RandomForestClassifier(criterion=method, random_state=42)
+    clf.fit(X, y)
+    predictions = clf.predict(X)
+
+    # Plotting the 2D visualization
+    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=predictions, edgecolor='k', s=150)
+    plt.title(f'2D PCA using {method}')
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.colorbar()
+    plt.tight_layout()
+    plt.show()
+
+    return predictions
+
+# To test the function
+# predictions_gini = simplifiedRandomForest('gini')
+predictions_entropy = simplifiedRandomForest('entropy')
