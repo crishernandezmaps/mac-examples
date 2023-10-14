@@ -584,4 +584,73 @@ def train_and_plot_mnist_nn():
     print(f"Test accuracy: {test_acc:.4f}")
 
 
-train_and_plot_mnist_nn()
+def som_iris_example():
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from minisom import MiniSom
+    from sklearn.datasets import load_iris
+    
+    # Load the iris dataset
+    data = load_iris()
+    X = data.data
+    y = data.target
+
+    # Train the SOM
+    som = MiniSom(7, 7, 4, sigma=0.5, learning_rate=0.5)
+    som.train_random(X, 1000)
+
+    # Visualization
+    plt.figure(figsize=(10, 10))
+    # Background colors
+    for x, t in enumerate(np.unique(y)):
+        idx = np.where(y == t)[0]
+        winners = np.array([som.winner(xx) for xx in X[idx]])
+        plt.scatter(winners[:, 0] + .5 + (np.random.rand(len(idx)) - .5)*.8,
+                    winners[:, 1] + .5 + (np.random.rand(len(idx)) - .5)*.8,
+                    s=100, c=[plt.cm.tab10(x)], label=data.target_names[t])
+    plt.xticks(np.arange(7+1))
+    plt.yticks(np.arange(7+1))
+    plt.grid()
+    plt.legend()
+    plt.title("SOM Clustering of Iris Dataset")
+    plt.show()
+
+
+def som_geographical_data_example():
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from minisom import MiniSom
+
+    # Generate random geographical data (latitude and longitude) around Europe
+    num_samples = 1000
+    lats = np.random.uniform(35, 70, num_samples)  # Latitude between 35 and 70
+    longs = np.random.uniform(-25, 50, num_samples)  # Longitude between -25 and 50
+    locations = np.array(list(zip(lats, longs)))
+
+    # Train the SOM
+    som_dim = 10
+    som = MiniSom(som_dim, som_dim, 2, sigma=1.0, learning_rate=0.5)
+    som.train_random(locations, 5000)
+
+    # Visualization
+    plt.figure(figsize=(10, 10))
+    plt.scatter(longs, lats, s=50, c='blue', marker='o')
+    
+    # Retrieve the weights
+    weights = som.get_weights()
+
+    # Mark the SOM neurons on the map
+    for x in range(som_dim):
+        for y in range(som_dim):
+            w = weights[x, y]
+            plt.plot(w[1], w[0], 'rs')
+    
+    plt.title("SOM Clustering of Random Geographic Locations around Europe")
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    plt.grid()
+    plt.show()
+
+
+
+som_geographical_data_example()
