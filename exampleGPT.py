@@ -445,4 +445,32 @@ def dbScan():
         app.run_server(debug=True)
 
 
-dbScan()
+def randomForestUsingEntropy():
+    """
+    Documentation: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn-ensemble-randomforestclassifier
+    """
+    import numpy as np
+    from sklearn.datasets import load_iris
+    from sklearn.ensemble import RandomForestClassifier
+
+    # Load iris dataset
+    data = load_iris()
+    X = data.data
+    y = data.target
+
+    # Train a random forest classifier using entropy as the criterion
+    clf = RandomForestClassifier(criterion='entropy', random_state=42)
+    clf.fit(X, y)
+
+    # Print feature importance
+    print("Feature importances based on entropy:")
+    for feature, importance in zip(data.feature_names, clf.feature_importances_):
+        print(f"{feature}: {importance:.4f}")
+
+    # Predict
+    predictions = clf.predict(X)
+    # You can further assess accuracy, precision, recall, etc.
+    return predictions
+
+
+randomForestUsingEntropy()
