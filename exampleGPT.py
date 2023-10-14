@@ -288,4 +288,64 @@ def davisBoulding():
     print(f"Davis-Bouldin Index: {dbi:.2f}")
 
 
-davisBoulding()
+def dbScan():
+    """
+    The DBSCAN algorithm uses two parameters:
+    •minPts: The minimum number of points (a threshold) clustered together 
+    for a region to be considered dense.
+    •eps (ε): A distance measure that will be used to locate the points in the 
+    neighborhood of any point. 
+    These parameters can be understood if we explore two concepts called 
+    Density Reachability and Density Connectivity.
+    Reachability in terms of density establishes a point to be reachable from 
+    another if it lies within a particular distance (eps) from it.
+    Connectivity, on the other hand, involves a transitivity-based chainingapproach to determine whether points are in a particular cluster. For 
+    example, p and q points could be connected if p->r->s->t->q, where a->b 
+    means b is in the neighborhood of a.    
+    """
+    import dash
+    from dash import dcc, html
+    import numpy as np
+    from sklearn.datasets import make_moons
+    from sklearn.cluster import DBSCAN
+    import pandas as pd
+    import plotly.express as px
+
+    # Generate sample data
+    data, _ = make_moons(n_samples=500, noise=0.05, random_state=42)
+
+    # Apply DBSCAN
+    dbscan = DBSCAN(eps=0.3, min_samples=5)
+    labels = dbscan.fit_predict(data)
+
+    # Create a DataFrame
+    df = pd.DataFrame(data, columns=["x", "y"])
+    df["label"] = labels
+
+    app = dash.Dash(__name__)
+
+    app.layout = html.Div([
+        dcc.Graph(id='live-graph'),
+        dcc.Interval(
+            id='interval-component',
+            interval=500,  # in milliseconds
+            n_intervals=0
+        )
+    ])
+
+    @app.callback(
+        dash.dependencies.Output('live-graph', 'figure'),
+        [dash.dependencies.Input('interval-component', 'n_intervals')]
+    )
+    def update_graph(n_intervals):
+        # Select the first n_intervals of the data and labels
+        limited_data = df.iloc[:n_intervals]
+        fig = px.scatter(limited_data, x="x", y="y", color="label", title="DBSCAN Clustering Animation")
+
+        return fig
+
+    if __name__ == '__main__':
+        app.run_server(debug=True)
+
+
+dbScan()
