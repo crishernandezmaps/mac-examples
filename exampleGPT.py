@@ -270,6 +270,9 @@ def elbowForFuzzy():
 
 
 def davisBoulding():
+    """
+    Davis Bouldin Index (Davies and Bouldin, 1979)
+    """
     from sklearn.cluster import KMeans
     from sklearn.datasets import make_blobs
     from sklearn.metrics import davies_bouldin_score
@@ -328,7 +331,7 @@ def dbScan():
         dcc.Graph(id='live-graph'),
         dcc.Interval(
             id='interval-component',
-            interval=500,  # in milliseconds
+            interval=100,  # in milliseconds
             n_intervals=0
         )
     ])
