@@ -525,45 +525,63 @@ def compareRandomForestCriteria():
 
 
 
-def simplifiedRandomForest(method='gini'):
-    """
-    Documentation: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn-ensemble-randomforestclassifier
-    """
+def train_and_plot_mnist_nn():
+    import numpy as np
+    import tensorflow as tf
     import matplotlib.pyplot as plt
-    from sklearn.datasets import load_iris
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.decomposition import PCA
+    from tensorflow.keras.datasets import mnist
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense, Flatten
+    from tensorflow.keras.utils import to_categorical 
 
-    # Validate method
-    if method not in ['gini', 'entropy']:
-        print("Invalid method. Choose either 'gini' or 'entropy'.")
-        return
+    # Load dataset
+    (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
-    # Load iris dataset
-    data = load_iris()
-    X = data.data
-    y = data.target
+    # Normalize the data: rescale the pixel values from the range [0, 255] to [0, 1]
+    train_images = train_images.astype('float32') / 255
+    test_images = test_images.astype('float32') / 255
 
-    # Prepare PCA for visualization
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X)
+    # One-hot encoding of labels
+    train_labels = to_categorical(train_labels)
+    test_labels = to_categorical(test_labels)
 
-    # Train a random forest classifier
-    clf = RandomForestClassifier(criterion=method, random_state=42)
-    clf.fit(X, y)
-    predictions = clf.predict(X)
+    # Build the model
+    model = Sequential()
+    model.add(Flatten(input_shape=(28, 28)))  # Flatten the 28x28 images into a 784-length vector
+    model.add(Dense(128, activation='relu'))  # Fully connected layer with 128 units and ReLU activation
+    model.add(Dense(10, activation='softmax'))  # Output layer with 10 units (for 10 classes) and softmax activation
 
-    # Plotting the 2D visualization
-    plt.scatter(X_pca[:, 0], X_pca[:, 1], c=predictions, edgecolor='k', s=150)
-    plt.title(f'2D PCA using {method}')
-    plt.xlabel('Principal Component 1')
-    plt.ylabel('Principal Component 2')
-    plt.colorbar()
+    # Compile the model
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    # Train the model and store its history
+    history = model.fit(train_images, train_labels, epochs=10, batch_size=32, validation_split=0.2)
+
+    # Plotting the training and validation accuracy and loss
+    plt.figure(figsize=(14, 5))
+    
+    # Plotting accuracy
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['accuracy'], label='Training Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    # Plotting loss
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
     plt.tight_layout()
     plt.show()
 
-    return predictions
+    # Evaluate the model
+    test_loss, test_acc = model.evaluate(test_images, test_labels)
+    print(f"Test accuracy: {test_acc:.4f}")
 
-# To test the function
-# predictions_gini = simplifiedRandomForest('gini')
-predictions_entropy = simplifiedRandomForest('entropy')
+
+train_and_plot_mnist_nn()
